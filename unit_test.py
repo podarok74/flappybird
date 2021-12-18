@@ -8,14 +8,9 @@ class TestsGame(unittest.TestCase):
         pygame.init()
         screen = pygame.display.set_mode((288,512))
         platform = pygame.image.load('assets/platform.png').convert()
-        try:
-            FlappyBird.create_plat(screen, platform, 0)
-            self.assertEqual(1, 1)
+        FlappyBird.create_plat(screen, platform, 0)
+        with self.assertRaises(AttributeError):
             FlappyBird.create_plat(None, platform, 0)
-            self.assertEqual(1, 0)
-        except AttributeError:
-            self.assertEqual(1, 1)
-
 
     def test_creating_colones(self):
         pygame.init()
@@ -38,6 +33,23 @@ class TestsGame(unittest.TestCase):
         self.assertEqual(FlappyBird.update_score(0, 1), 1)
         self.assertEqual(FlappyBird.update_score(0, 0), 0)
         self.assertEqual(FlappyBird.update_score(1, 0), 1)
+
+
+    def test_checking_collision(self):
+        pygame.init()
+        screen = pygame.display.set_mode((288,512))
+        bird = pygame.image.load('assets/bird.png').convert_alpha()
+        colone = pygame.image.load('assets/colone.png').convert()
+        b_rect = bird.get_rect(center = (50,256))
+        colone_list = []
+        colone_list.extend(FlappyBird.create_colone([400], colone))
+        self.assertTrue(FlappyBird.check_collision(colone_list, b_rect))
+        b_rect.center = (400,256)
+        self.assertFalse(FlappyBird.check_collision(colone_list, b_rect))
+        b_rect.center = (50,-50)
+        self.assertFalse(FlappyBird.check_collision(colone_list, b_rect))
+        b_rect.center = (50,450)
+        self.assertFalse(FlappyBird.check_collision(colone_list, b_rect))
 
 
 if __name__ == '__main__':

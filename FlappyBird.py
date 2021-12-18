@@ -1,13 +1,19 @@
 import pygame, sys, random
-
-""" Функция, которая отвечает за создание двух платформ друг за другом (288 пикселей ширина нашего экрана)"""
+width = 288
+height = 450
 def create_plat(screen, platform, plat_pos):
-    screen.blit(platform,(plat_pos,450))
-    screen.blit(platform,(plat_pos + 288,450))
-
-""" Создаем функцию, которая будет отвечать за создание прямоугольников по контору колон сверху(up colone)
- и снизу (down_colone) со случайной высотой по центру экрана(внизу или вверху), расстояние между колонами 150"""
+    """Функция, которая отвечает за создание двух платформ друг за другом
+     :param screen: экран
+     :param platform: платформа
+     :param plat_pos: позиция плтаформы
+    """
+    screen.blit(platform,(plat_pos,height))
+    screen.blit(platform,(plat_pos + width,height))
 def create_colone(colone_height, colone):
+    """Создаем функцию, которая будет отвечать за создание прямоугольников по контору колон сверху(up colone) и снизу (down_colone) со случайной высотой по центру экрана(внизу или вверху)
+    :param colone_height: высота колоны
+    :param colone: колонна
+    """
     try:
         random_colone = random.choice(colone_height) #выбирает случайную высоту колон
         down_colone = colone.get_rect(midtop = (400,random_colone))
@@ -20,15 +26,18 @@ def create_colone(colone_height, colone):
     except IndexError:
         return None, 'IndexError'
 
-""" Функция,которая будет отвечать за перемещение прямоугольников по контору колон влево  """
 def colone_move(colones):
+    """Функция,которая будет отвечать за перемещение прямоугольников по контору колон влево
+    :param colones: колоны
+    :return: наши колоны
+    """
     for colone in colones:
         colone.centerx -= 2.5
     return colones    
 
-""" Функция, которая отвечает за вывод колон на экран, при этом проверяется где находится колона.
-В случае если она находится вверху - она переворачивается на 360 градусов """
 def draw_colones(colones, screen, colone):
+    """Функция, которая отвечает за вывод колон на экран, при этом проверяется где находится колона. В случае если она находится вверху - она переворачивается на 360 градусов 
+    """
     for colon in colones:
         if colon.bottom >= 512:
             screen.blit(colone,colon)
@@ -36,23 +45,31 @@ def draw_colones(colones, screen, colone):
             flip_pipe = pygame.transform.flip(colone, False, True)
             screen.blit(flip_pipe,colon)
 
-""" Функция, которая проверяет не сталкивается ли прямоугольник сделанный вокруг птицы с прямоугольников
- вокруг трубы, а также выходим ли мы за пределы экрана в обоих случаях устанавливаем flag - false"""
 def check_collision(colones, b_rect):
+    """ Функция, которая проверяет не сталкивается ли прямоугольник сделанный вокруг птицы с прямоугольников вокруг трубы, а также выходим ли мы за пределы экрана в обоих случаях устанавливаем flag - false
+    :param b_rect: прямоугольник вокруг птицы
+    """
     for pipe in colones:
         if b_rect.colliderect(pipe):
             return False
     if b_rect.top <= -50 or b_rect.bottom >= 450:
         return False
     return True
-
-""" Пишем функцию,которая будет вращать нашу птичку взависимости от направления полета """          
+         
 def rotate_bird(bird, speed):
+    """Пишем функцию,которая будет вращать нашу птичку взависимости от направления полета
+    :param speed: скорость
+    :param bird: птица
+    """ 
     new_bird = pygame.transform.rotozoom(bird,-speed * 3,1)
     return new_bird
 
-""" Пишем функцию для подсчета очков """
 def score_display(game_state, game_font, score, high_score, screen):
+    """ Пишем функцию для подсчета очков
+    :param game_state: статус игры
+    :param score: текущий счет
+    :param high_score: наибольший счет
+    """
     if game_state == 'main_game':
         score_surface = game_font.render(f'Time in flight:{int(score)} ', True, (255,255,255))
         score_rect = score_surface.get_rect(center = (144,50))
@@ -65,28 +82,34 @@ def score_display(game_state, game_font, score, high_score, screen):
         high_score_surface = game_font.render(str(int(high_score)), True, (255,255,255))
         high_score_rect = high_score_surface.get_rect(center = (144,50))
         screen.blit(high_score_surface, high_score_rect)
-
-""" Пишем функцию для подсчета текущего счета в игре и максимального за период игры    """  
+ 
 def update_score(score, high_score):
+    """ Пишем функцию для подсчета текущего счета в игре и максимального за период игры
+    :param score: текущий счет
+    :param high_score: наибольший счет
+    """ 
     if score > high_score:
         high_score = score
     return high_score        
 
 def main():
     pygame.init()
-    """ Задаем размер нашего экрана, путем подбора останавливаемся на 288х512,частоту кадров а также шрифт и его размер """
+    #Задаем размер нашего экрана, путем подбора останавливаемся на 288х512,частоту кадров а также шрифт и его размер
+    
     screen = pygame.display.set_mode((288,512))
     clock = pygame.time.Clock()
     game_font = pygame.font.SysFont('microsoftttaile',40)
 
-    """Заранее заданные параметры для нашей игры, устанавливаем статус игры True и значения для счета"""
+    #Заранее заданные параметры для нашей игры, устанавливаем статус игры True и значения для счета
+    
     gravity = 0.25
     speed = 0
     status = True
     score = 0
     high_score = 0
 
-    """ загрузка необходимых фото для игры """
+    #загрузка необходимых фото для игры
+    
     fone = pygame.image.load('assets/fone.png').convert()
 
     platform = pygame.image.load('assets/platform.png').convert()
@@ -100,13 +123,12 @@ def main():
     colone_list = []
     SPAWNPIPE = pygame.USEREVENT
     pygame.time.set_timer(SPAWNPIPE,1200) # Устанавливаем таймер для появления колон в 1200 милисекунд
-    """Список с длинной колон, откуда будет брать модуль random"""
+    #Список с длинной колон, откуда будет брать модуль random
     colone_height = [200,300,400]
     welcome = pygame.image.load('assets/welcome.png').convert_alpha()
     welcome_rect = welcome.get_rect(center = (144,256))
 
-    """ Основной цикл игры, в котором используем sys для выхода из игры, обнуляем наши параметры в случае начала новой игры,
-    а также программируем пробел для управления птицой и начала новой игры в случае проигрыша """
+    # Основной цикл игры, в котором используем sys для выхода из игры, обнуляем наши параметры в случае начала новой игры,а также программируем пробел для управления птицой и начала новой игры в случае проигрыша
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -148,8 +170,7 @@ def main():
             high_score = update_score(score, high_score)
             score_display('game_over', game_font, score, high_score, screen)    
         
-        """Выполняем движение платформы на -1 влево, а также когда платформа находится слишком далеко сбрасываем значение до 0,
-         что позволяет нам видеть бесконечно движущуюся платформу  """
+        #Выполняем движение платформы на -1 влево, а также когда платформа находится слишком далеко сбрасываем значение до 0,что позволяет нам видеть бесконечно движущуюся платформу
         plat_pos -= 1
         create_plat(screen, platform, plat_pos)
         if plat_pos <= -288:
